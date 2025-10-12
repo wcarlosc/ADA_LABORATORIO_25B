@@ -1,0 +1,10 @@
+P001,Laptop HP,1200.50
+P002,Mouse Logitech,25.99
+P003,Teclado Mecanico,85.00
+P004,Monitor Samsung,350.75
+P005,Auriculares Sony,120.00
+P006,Webcam HD,45.50
+P007,Disco Duro 1TB,75.99
+P008,Memoria RAM 16GB,95.00
+P009,SSD 500GB,110.25
+P010,Impresora Epson,280.00
