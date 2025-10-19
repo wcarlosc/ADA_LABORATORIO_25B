@@ -2,44 +2,53 @@ import random
 
 class Graph:
     def __init__(self):
-        self.nodes = [] #contiene representaciones e.g ("A","B",...)
-        self.edges = [] #contiene las aristas e.g ("A","B",5),("C","B",5),...
+        self.adj = {} 
         self.cost = 0
     
-    def add_node(self, value):
-        if value not in self.nodes:
-            self.nodes.append(value)
-
-    def add_edge(self, node1, node2, weight):
-        self.add_node(node1)
-        self.add_node(node2)
-        self.cost += weight
-        self.edges.append((node1, node2, weight))
+    def addNode(self, value):
+        if value not in self.adj:
+            self.adj[value] = []
     
-    def print_graph(self):
+    def addEdge(self, node1, node2, weight):
+        self.addNode(node1)
+        self.addNode(node2)
+        self.cost += weight
+        self.adj[node1].append((node2, weight))
+        self.adj[node2].append((node1, weight))
+    
+    def getEdges(self):
+        seen = set()
+        edges = []
+        for node1 in self.adj:
+            for node2, weight in self.adj[node1]:
+                edge = tuple(sorted([node1, node2]))
+                if edge not in seen:
+                    seen.add(edge)
+                    edges.append((node1, node2, weight))
+        return edges
+    
+    def printGraph(self):
         print("Nodos:")
-        for n in self.nodes:
-            print(f"{n} " , end="")
+        for n in self.adj:
+            print(f"{n} ", end="")
         print("\nAristas:")
-        for (n1, n2, w) in self.edges:
+        for n1, n2, w in self.getEdges():
             print(f"  {n1} - {n2} : {w}")
         print(f"costo: {self.cost}")
 
-def random_graph(num_nodes, num_edges):
+def randomGraph(numNodes, numEdges):
     g = Graph()
-    for i in range(num_nodes):
-        g.add_node(chr(65 + i))
+    nodes = [chr(65 + i) for i in range(numNodes)]
+    for n in nodes:
+        g.addNode(n)
     r = 0
-    for i in range(num_nodes):
-        for j in range(i + 1, num_nodes):
-            if r >= num_edges:
+    for i in range(numNodes):
+        for j in range(i + 1, numNodes):
+            if r >= numEdges:
                 break
-            g.add_edge(g.nodes[i], g.nodes[j], number_random())
+            g.addEdge(nodes[i], nodes[j], random.randint(2, 10))
             r += 1
     return g
-
-def number_random():
-    return random.randint(2, 10)
 
 def find(parent, node):
     if parent[node] != node:
@@ -48,32 +57,27 @@ def find(parent, node):
 
 def kruskal(graph):
     result = Graph()
-    parent = {node: node for node in graph.nodes}
-    sorted_edges = sorted(graph.edges, key=lambda x: x[2]) # ordena por pesos
+    parent = {node: node for node in graph.adj}
+    sortedEdges = sorted(graph.getEdges(), key=lambda x: x[2])
     
-    for node1, node2, weight in sorted_edges:
+    for node1, node2, weight in sortedEdges:
         root1 = find(parent, node1)
         root2 = find(parent, node2)
         if root1 != root2:
-            result.add_edge(node1, node2, weight)
+            result.addEdge(node1, node2, weight)
             parent[root2] = root1
     
     return result
 
 def prim(graph):
     result = Graph()
-    if not graph.nodes:
+    if not graph.adj:
         return result
     
-    distance = {node: float('inf') for node in graph.nodes}
-    parent = {node: None for node in graph.nodes}
-    adj = {node: [] for node in graph.nodes}
+    distance = {node: float('inf') for node in graph.adj}
+    parent = {node: None for node in graph.adj}
     
-    for node1, node2, weight in graph.edges:
-        adj[node1].append((node2, weight))
-        adj[node2].append((node1, weight))
-    
-    start = graph.nodes[0]
+    start = list(graph.adj.keys())[0]
     distance[start] = 0
     queue = [(0, start)]
     visited = set()
@@ -86,9 +90,9 @@ def prim(graph):
         visited.add(u)
         
         if parent[u] is not None:
-            result.add_edge(parent[u], u, distance[u])
+            result.addEdge(parent[u], u, distance[u])
         
-        for v, weight in adj[u]:
+        for v, weight in graph.adj[u]:
             if v not in visited and weight < distance[v]:
                 parent[v] = u
                 distance[v] = weight
@@ -97,13 +101,11 @@ def prim(graph):
     return result
 
 print("***Original****")
-g = random_graph(11, 20)
-g.print_graph()
-
+g = randomGraph(11, 20)
+g.printGraph()
 print("\n***Kruskal****")
-g_kruskal = kruskal(g)
-g_kruskal.print_graph()
-
+gKruskal = kruskal(g)
+gKruskal.printGraph()
 print("\n***Prim****")
-g_prim = prim(g)
-g_prim.print_graph()
+gPrim = prim(g)
+gPrim.printGraph()
